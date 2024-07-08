@@ -1,23 +1,31 @@
-import express, { Request } from 'express';
+import {
+    init,
+    postUpgrade,
+    preUpgrade,
+    Server,
+    StableBTreeMap,
+    stableJson
+} from 'azle';
+import { Database } from 'sql.js/dist/sql-asm.js';
 
-let db = {
-    hello: ''
-};
+import { initDb } from './db';
+import { initServer } from './server';
 
-const app = express();
+let db: Database;
 
-app.use(express.json());
-
-app.get('/db', (req, res) => {
-    res.json(db);
+let stableDbMap = StableBTreeMap<'DATABASE', Uint8Array>(0, stableJson, {
+    toBytes: (data: Uint8Array) => data,
+    fromBytes: (bytes: Uint8Array) => bytes
 });
 
-app.post('/db/update', (req: Request<any, any, typeof db>, res) => {
-    db = req.body;
-
-    res.json(db);
+export default Server(initServer, {
+    init: init([], async () => {
+        db = await initDb();
+    }),
+    preUpgrade: preUpgrade(() => {
+        stableDbMap.insert('DATABASE', db.export());
+    }),
+    postUpgrade: postUpgrade([], async () => {
+        db = await initDb(stableDbMap.get('DATABASE').Some);
+    })
 });
-
-app.use(express.static('/dist'));
-
-app.listen();
