@@ -1,5 +1,4 @@
 import express from 'express';
-import path from 'path';
 
 import { getRouter as getRouterPosts } from '../entities/posts/router';
 import { getRouter as getRouterUsers } from '../entities/users/router';
@@ -7,7 +6,7 @@ import { getRouter as getRouterUsers } from '../entities/users/router';
 export function initServer() {
     let app = express();
 
-    app.use(express.static(path.join(__dirname, 'dist')));
+    app.use(express.static('/dist'));
 
     app.use(express.json());
 
