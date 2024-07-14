@@ -4,7 +4,7 @@ const Register = () => {
     const [username, setUsername] = useState('');
     const [age, setAge] = useState('');
     const [userId, setUserId] = useState('');
-    const [user, setUser] = useState(null);
+    const [userOutput, setUserOutput] = useState(null);
     const [error, setError] = useState('');
 
     const handleSubmit = async (e) => {
@@ -16,7 +16,7 @@ const Register = () => {
         };
 
         try {
-            const response = await fetch('/users', {
+            const response = await fetch('http://bkyz2-fmaaa-aaaaa-qaaaq-cai.localhost:4943/users', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -43,7 +43,7 @@ const Register = () => {
         e.preventDefault();
 
         try {
-            const response = await fetch('/users/${userId}', {
+            const response = await fetch(`http://bkyz2-fmaaa-aaaaa-qaaaq-cai.localhost:4943/users/${userId}`, {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
@@ -53,13 +53,20 @@ const Register = () => {
             if (!response.ok) {
                 throw new Error('Failed to fetch user');
             }
-
+            
             const result = await response.json();
-            setUser(result);
-            setError('');
+
+            if (result != null) {
+                setUserOutput(result);
+                setError('');
+            }
+            else {
+                setUserOutput(null);
+                setError('User not found');
+            }
         } catch (error) {
             setError('User not found');
-            setUser(null);
+            setUserOutput(null);
         }
     }
 
@@ -73,6 +80,7 @@ return (
                 placeholder="username"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
+                required
             />
             <input
                 className="w-36 mt-2"
@@ -80,6 +88,7 @@ return (
                 placeholder="age"
                 value={age}
                 onChange={(e) => setAge(e.target.value)}
+                required
             />
             <button className="mt-2 mb-5 bg-gray-400" type="submit">
                     Submit
@@ -89,7 +98,7 @@ return (
         <form className="flex flex-col" onSubmit={handleGet}>
             <input
                 className="w-36 mt-2"
-                type="text"
+                type="number"
                 placeholder="User ID"
                 value={userId}
                 onChange={(e) => setUserId(e.target.value)}
@@ -97,11 +106,11 @@ return (
             <button className="mt-2 mb-5 bg-gray-400" type="submit">
                     Submit
             </button>
-            {user && (
+            {userOutput && (
                 <div className="mt-4 p-2 bg-white w-full text-left">
-                    <p><strong>ID:</strong> {user.id}</p>
-                    <p><strong>Username:</strong> {user.username}</p>
-                    <p><strong>Age:</strong> {user.age}</p>
+                    <p><strong>ID:</strong> {userOutput.id}</p>
+                    <p><strong>Username:</strong> {userOutput.username}</p>
+                    <p><strong>Age:</strong> {userOutput.age}</p>
                 </div>
             )}
             {error && (
